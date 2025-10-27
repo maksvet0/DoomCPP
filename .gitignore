@@ -1,0 +1,6 @@
+# builds
+cmake-build-debug
+build
+
+# others
+.idea
