@@ -17,7 +17,7 @@ add_executable(DoomCPP
     ${SRC}/Main.cpp
     ${SRC}/main/App.cpp
     ${SRC}/main/App.hpp
-    ${SRC}/main/Data.hpp
+    ${SRC}/main/SDebug.cpp
 )
 
 target_link_libraries(DoomCPP

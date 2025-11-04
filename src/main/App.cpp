@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <utility>
 
-App::App(DAppManifest  manifest, DSettings settings) : settings(std::move(settings)), manifest(std::move(manifest)) {
+App::App(DAppManifest  manifest, DSettings settings) : settings(std::move(settings)), manifest(std::move(manifest)), debug() {
     glfw_window = initGLFW();
     glfwMakeContextCurrent(glfw_window);
     vk_instance = initVulkan();
@@ -39,19 +39,21 @@ GLFWwindow* App::initGLFW() const {
     return wnd;
 }
 
-VkInstance App::initVulkan() const {
+VkInstance App::initVulkan() {
     auto app_info = manifest.toVulkan();
 
     unsigned int extensions_count;
     const auto extensions = glfwGetRequiredInstanceExtensions(&extensions_count);
+
+    auto layers = debug.getValidationLayers();
 
     const VkInstanceCreateInfo create_info = {
         .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
         .pNext = nullptr,
         .flags = {},
         .pApplicationInfo = &app_info,
-        .enabledLayerCount = 0,
-        .ppEnabledLayerNames = nullptr,
+        .enabledLayerCount = layers.size(),
+        .ppEnabledLayerNames = layers.data(),
         .enabledExtensionCount = extensions_count,
         .ppEnabledExtensionNames = extensions,
     };

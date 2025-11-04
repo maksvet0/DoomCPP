@@ -3,6 +3,7 @@
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
 #include "Data.hpp"
+#include "SDebug.hpp"
 
 class App final {
 public:
@@ -13,10 +14,11 @@ public:
 
 private:
     [[nodiscard]] GLFWwindow* initGLFW() const;
-    [[nodiscard]] VkInstance initVulkan() const;
+    [[nodiscard]] VkInstance initVulkan();
 
     GLFWwindow* glfw_window;
     VkInstance vk_instance;
+    SDebug debug;
 
     DSettings settings;
     const DAppManifest manifest;
