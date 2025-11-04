@@ -14,10 +14,10 @@ FetchContent_MakeAvailable(glfw)
 find_package(Vulkan REQUIRED)
 
 add_executable(DoomCPP
-  ${SRC}/Main.cpp
-    src/main/App.cpp
-    src/main/App.hpp
-    src/main/Data.hpp
+    ${SRC}/Main.cpp
+    ${SRC}/main/App.cpp
+    ${SRC}/main/App.hpp
+    ${SRC}/main/Data.hpp
 )
 
 target_link_libraries(DoomCPP

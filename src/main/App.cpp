@@ -45,7 +45,7 @@ VkInstance App::initVulkan() const {
     unsigned int extensions_count;
     const auto extensions = glfwGetRequiredInstanceExtensions(&extensions_count);
 
-    VkInstanceCreateInfo create_info = {
+    const VkInstanceCreateInfo create_info = {
         .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
         .pNext = nullptr,
         .flags = {},
