@@ -1,14 +1,22 @@
 #include "SDebug.hpp"
 
+#include <cstring>
+
 SDebug::SDebug() {
 }
 
 SDebug::~SDebug() {
 }
 
-std::vector<char*> SDebug::getValidationLayers() {
+std::vector<const char*> SDebug::getValidationLayers() {
 
-    return {};
+    uint32_t layerCount;
+    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+    std::vector<VkLayerProperties> availableLayers(layerCount);
+    vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+    return validationLayers;
 }
 
 void SDebug::info(const std::string &from, const std::string &message) {

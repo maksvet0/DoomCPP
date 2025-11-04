@@ -18,6 +18,8 @@ add_executable(DoomCPP
     ${SRC}/main/App.cpp
     ${SRC}/main/App.hpp
     ${SRC}/main/SDebug.cpp
+        src/graphics/Devices.cpp
+        src/graphics/Devices.h
 )
 
 target_link_libraries(DoomCPP

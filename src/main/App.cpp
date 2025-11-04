@@ -52,7 +52,7 @@ VkInstance App::initVulkan() {
         .pNext = nullptr,
         .flags = {},
         .pApplicationInfo = &app_info,
-        .enabledLayerCount = layers.size(),
+        .enabledLayerCount = static_cast<uint32_t>(layers.size()),
         .ppEnabledLayerNames = layers.data(),
         .enabledExtensionCount = extensions_count,
         .ppEnabledExtensionNames = extensions,
