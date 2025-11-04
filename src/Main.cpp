@@ -4,7 +4,7 @@ int main() {
     App(
         {
             .engine = {
-                .name = "DoomCPP",
+                .name = "SimpleEngine",
                 .version = {
                     .major = 0,
                     .minor = 0,
@@ -12,7 +12,7 @@ int main() {
                 }
             },
             .app = {
-                .name = "SimpleEngine",
+                .name = "DoomCPP",
                 .version = {
                     .major = 0,
                     .minor = 0,
