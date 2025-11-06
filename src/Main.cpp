@@ -19,12 +19,16 @@ int main() {
                     .patch = 1
                 }
             },
-            .vulkan_api_version = VK_API_VERSION_1_4
+            .vulkan_api_version = VK_API_VERSION_1_4,
         },
         {
             .graphics = {
                 .window_size = std::make_tuple(1280, 720),
                 .is_fullscreen = false
+            },
+            .debug = {
+                .verbose_level = 1,
+                .is_save_previous_log = false
             }
         }
     ).run();

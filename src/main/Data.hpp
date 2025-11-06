@@ -41,6 +41,12 @@ struct DGraphicsSettings final {
     bool is_fullscreen;
 };
 
+struct DDebugSettings final {
+    char verbose_level;
+    bool is_save_previous_log;
+};
+
 struct DSettings final {
     DGraphicsSettings graphics;
+    DDebugSettings debug;
 };

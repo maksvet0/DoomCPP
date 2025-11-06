@@ -13,13 +13,13 @@ FetchContent_MakeAvailable(glfw)
 
 find_package(Vulkan REQUIRED)
 
+include_directories(${SRC})
+
 add_executable(DoomCPP
     ${SRC}/Main.cpp
     ${SRC}/main/App.cpp
-    ${SRC}/main/App.hpp
     ${SRC}/main/SDebug.cpp
-        src/graphics/Devices.cpp
-        src/graphics/Devices.h
+    ${SRC}/graphics/Device.cpp
 )
 
 target_link_libraries(DoomCPP

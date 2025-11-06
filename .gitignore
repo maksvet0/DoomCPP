@@ -5,3 +5,7 @@ build
 # others
 .idea
 .vscode
+
+# logs
+*.log
+!res/logs/Latest.log
