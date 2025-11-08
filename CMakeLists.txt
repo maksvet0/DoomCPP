@@ -1,19 +1,21 @@
 cmake_minimum_required(VERSION 4.0)
-project(DoomCPP)
+project(DoomCPP CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(SRC ${CMAKE_SOURCE_DIR}/src)
 include(FetchContent)
+include_directories(${SRC})
 
 FetchContent_Declare(glfw
     GIT_REPOSITORY https://github.com/glfw/glfw.git
-    GIT_TAG 3.4
+    GIT_TAG master
+    GIT_SHALLOW ON
 )
 FetchContent_MakeAvailable(glfw)
 
 find_package(Vulkan REQUIRED)
 
-include_directories(${SRC})
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=leak")
 
 add_executable(DoomCPP
     ${SRC}/Main.cpp
@@ -24,5 +26,5 @@ add_executable(DoomCPP
 
 target_link_libraries(DoomCPP
     glfw
-    Vulkan::Vulkan
+    ${Vulkan_LIBRARIES}
 )

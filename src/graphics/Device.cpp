@@ -2,27 +2,26 @@
 
 #include "main/SDebug.hpp"
 
-Device::Device(VkInstance vk_instance, DGraphicsSettings settings) : debug(DDebugSettings{}) {
+Device::Device(VkInstance vk_instance, DGraphicsSettings settings) {
     //PICKING A PHYSICAL DEVICE
     uint32_t device_count = 0;
     vkEnumeratePhysicalDevices(vk_instance, &device_count, nullptr);
 
     if (device_count == 0)
-        SDebug::self->ferr("VULKAN::DEVICE", "No suitable devices!", "VULKAN::DEVICES::INIT");
+        SDebug::self->ferr("VULKAN::DEVICE", "No suitable device!", "VULKAN::DEVICE::INIT");
 
     std::vector<VkPhysicalDevice> devices(device_count);
     vkEnumeratePhysicalDevices(vk_instance, &device_count, devices.data());
 
-    for (const auto& device : devices) {
+    for (const auto &device: devices) {
         if (isDeviceSuitable(device)) {
             physical_device = device;
             break;
         }
     }
 
-    if (physical_device == VK_NULL_HANDLE) {
-        throw std::runtime_error("failed to find a suitable GPU!");
-    }
+    if (physical_device == VK_NULL_HANDLE)
+        SDebug::self->ferr("VULKAN::DEVICE", "No suitable device!", "VULKAN::DEVICE::INIT");
 
     //PICKING A LOGICAL DEVICE
     QueueFamilyIndices family_indices = pickFamilyQueues(physical_device);
@@ -44,9 +43,9 @@ Device::Device(VkInstance vk_instance, DGraphicsSettings settings) : debug(DDebu
     createDeviceInfo.enabledLayerCount = static_cast<uint32_t>(layers.size());
     createDeviceInfo.ppEnabledLayerNames = layers.data();
 
-    if (vkCreateDevice(physical_device, &createDeviceInfo, nullptr, &picked_device) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create logical device!");
-    }
+    if (vkCreateDevice(physical_device, &createDeviceInfo, nullptr, &picked_device) != VK_SUCCESS)
+        SDebug::self->ferr("VULKAN::LOGICAL_DEVICE", "Cannot create logical device!", "VULKAN::LOGICAL_DEVICE::INIT");
+
     vkGetDeviceQueue(picked_device, family_indices.graphicsFamily.value(), 0, &graphicsQueue);
 }
 
@@ -64,7 +63,7 @@ Device::QueueFamilyIndices Device::pickFamilyQueues(VkPhysicalDevice physical_de
     std::vector<VkQueueFamilyProperties> queueFamilies(queue_family_count);
     vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_count, queueFamilies.data());
 
-    int i;
+    int i = 0;
     for (const auto& queueFamily : queueFamilies) {
         if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             family_indices.graphicsFamily = i;
@@ -75,4 +74,6 @@ Device::QueueFamilyIndices Device::pickFamilyQueues(VkPhysicalDevice physical_de
         }
         i++;
     }
+
+    return family_indices;
 }

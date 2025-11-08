@@ -18,28 +18,23 @@ private:
     struct QueueFamilyIndices {
         std::optional<uint32_t> graphicsFamily;
 
-        inline bool is_completed() {
+        [[nodiscard]] inline bool is_completed() const {
             return graphicsFamily.has_value();
         }
     };
 
-    inline bool isDeviceSuitable(VkPhysicalDevice device) {
-        QueueFamilyIndices indices = pickFamilyQueues(device);
+    static inline bool isDeviceSuitable(VkPhysicalDevice device) {
+        const QueueFamilyIndices indices = pickFamilyQueues(device);
 
         return indices.is_completed();
     }
 
-    std::vector<VkPhysicalDevice> getPhysicalDevices();
-    //VkPhysicalDevice pickPhysicalDevice(std::vector<VkPhysicalDevice> from);
-    std::vector<VkQueueFamilyProperties> getQueuesProperties();
-    QueueFamilyIndices pickFamilyQueues(VkPhysicalDevice physical_device);
-    void createDevice();
+    static QueueFamilyIndices pickFamilyQueues(VkPhysicalDevice physical_device);
 
     std::optional<uint32_t> graphicsFamily;
     VkQueue graphicsQueue;
 
-    SDebug debug;
-    std::vector<const char*> layers = debug.getValidationLayers();
+    std::vector<const char*> layers = SDebug::self->getValidationLayers();
 };
 
 

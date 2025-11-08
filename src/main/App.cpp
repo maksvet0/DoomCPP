@@ -1,18 +1,21 @@
 #include "App.hpp"
 
-#include <vulkan/vulkan.h>
 #include <utility>
 
-App::App(DAppManifest  manifest, DSettings settings)
-    : settings(std::move(settings)), manifest(std::move(manifest)), debug(settings.debug)
+
+App::App(DAppManifest manifest, DSettings settings)
+    : debug(settings.debug), settings(std::move(settings)), manifest(std::move(manifest))
 {
     glfw_window = initGLFW();
+    glfwShowWindow(glfw_window);
     glfwMakeContextCurrent(glfw_window);
     vk_instance = initVulkan();
+    vk_surface = initSurface();
+    vk_device = new Device(vk_instance, settings.graphics);
 }
 
 App::~App() {
-    //delete vk_device;
+    delete vk_device;
     vkDestroyInstance(vk_instance, nullptr);
     glfwDestroyWindow(glfw_window);
     glfwTerminate();
@@ -29,6 +32,9 @@ GLFWwindow* App::initGLFW() {
     if (!glfwInit())
         debug.ferr("GLFW", "Can't initialize!", "FERR::GLFW::INIT");
     debug.info("GLFW", "Initialized!");
+
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_FOCUS_ON_SHOW, GLFW_TRUE);
 
     const auto wnd = glfwCreateWindow(
         std::get<0>(settings.graphics.window_size),
@@ -71,4 +77,13 @@ VkInstance App::initVulkan() {
     debug.info("VULKAN", "Initialized!");
 
     return instance;
+}
+
+VkSurfaceKHR App::initSurface() {
+    VkSurfaceKHR sur;
+
+    if (glfwCreateWindowSurface(vk_instance, glfw_window, nullptr, &sur))
+         debug.ferr("GLFW::SURFACE", "Can't create surface!", "FERR::GLFW::SURFACE::INIT");
+
+    return sur;
 }

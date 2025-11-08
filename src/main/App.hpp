@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <GLFW/glfw3.h>
 #include "Data.hpp"
 #include "SDebug.hpp"
@@ -16,8 +15,10 @@ public:
 private:
     [[nodiscard]] GLFWwindow* initGLFW();
     [[nodiscard]] VkInstance initVulkan();
+    [[nodiscard]] VkSurfaceKHR initSurface();
 
     GLFWwindow* glfw_window;
+    VkSurfaceKHR vk_surface;
     VkInstance vk_instance;
     Device* vk_device;
     SDebug debug;
