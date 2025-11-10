@@ -8,23 +8,31 @@ include_directories(${SRC})
 
 FetchContent_Declare(glfw
     GIT_REPOSITORY https://github.com/glfw/glfw.git
-    GIT_TAG latest
+    GIT_TAG master # NOTE: latest is unstable branch
+    GIT_SHALLOW ON
+)
+FetchContent_Declare(tomlplusplus
+    GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
+    GIT_TAG v3.4.0
     GIT_SHALLOW ON
 )
 FetchContent_MakeAvailable(glfw)
+FetchContent_MakeAvailable(tomlplusplus)
+
 
 find_package(Vulkan REQUIRED)
-
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=leak")
 
 add_executable(DoomCPP
     ${SRC}/Main.cpp
     ${SRC}/main/App.cpp
     ${SRC}/main/SDebug.cpp
     ${SRC}/graphics/Device.cpp
+    ${SRC}/io/SInput.hpp
+    ${SRC}/io/Files.hpp
 )
 
 target_link_libraries(DoomCPP
-        glfw
-        Vulkan::Vulkan
+    glfw
+    tomlplusplus::tomlplusplus
+    Vulkan::Vulkan
 )

@@ -39,6 +39,7 @@ struct DAppManifest final {
 struct DGraphicsSettings final {
     std::tuple<int, int> window_size;
     bool is_fullscreen;
+    std::string device_name;
 };
 
 struct DDebugSettings final {

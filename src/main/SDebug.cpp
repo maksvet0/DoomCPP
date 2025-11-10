@@ -23,9 +23,11 @@ SDebug::SDebug(DDebugSettings settings) : verbose_level(settings.verbose_level) 
     latest_log = std::ofstream("res/logs/Latest.log");
 
     latest_log << std::format(
-        "SimpleEngine Log File >>>\nINFO:\n\tYEAR: {}\n\tMONTH: {}\n\tDAY: {}\n\tTIME: {}:{}\n",
+        "SimpleEngine Log File >>>\nINFO:\n\tYEAR: {}\n\tMONTH: {}\n\tDAY: {}\n\tTIME: {}:{}\n\n",
         local_time->tm_year + 1900, local_time->tm_mon + 1, local_time->tm_mday, local_time->tm_hour, local_time->tm_min
     );
+
+    latest_log.flush();
 }
 
 SDebug::~SDebug() {

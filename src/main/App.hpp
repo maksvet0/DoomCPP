@@ -5,6 +5,7 @@
 #include "Data.hpp"
 #include "SDebug.hpp"
 #include "graphics/Device.hpp"
+#include "io/SInput.hpp"
 
 class App final {
 public:
@@ -23,6 +24,7 @@ private:
     VkInstance vk_instance;
     Device* vk_device;
     SDebug debug;
+    SInput* input;
 
     DSettings settings;
     const DAppManifest manifest;

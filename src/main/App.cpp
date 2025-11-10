@@ -2,19 +2,28 @@
 
 #include <utility>
 
+void glfwErrorCallback(int error_code, const char* description) {
+    SDebug::self->err("GLFW::", std::format("{} : {}", error_code, description));
+}
 
 App::App(DAppManifest manifest, DSettings settings)
     : debug(settings.debug), settings(std::move(settings)), manifest(std::move(manifest))
 {
+    glfwSetErrorCallback(glfwErrorCallback);
     glfw_window = initGLFW();
-    glfwShowWindow(glfw_window);
-    glfwMakeContextCurrent(glfw_window);
+    input = new SInput(glfw_window);
+    input->setPressed(SInput::EKey::ESCAPE, [this] {
+        glfwSetWindowShouldClose(glfw_window, true);
+    });
     vk_instance = initVulkan();
+    glfwShowWindow(glfw_window);
     vk_surface = initSurface();
-    vk_device = new Device(vk_instance, settings.graphics);
+    vk_device = new Device(vk_instance, this->settings.graphics);
 }
 
 App::~App() {
+    delete input;
+    vkDestroySurfaceKHR(vk_instance, vk_surface, nullptr);
     delete vk_device;
     vkDestroyInstance(vk_instance, nullptr);
     glfwDestroyWindow(glfw_window);
@@ -23,7 +32,8 @@ App::~App() {
 
 void App::run() {
     while (!glfwWindowShouldClose(glfw_window)) {
-        glfwSwapBuffers(glfw_window);
+        if (input->isKey(SInput::EKey::ESCAPE, SInput::EKeyAction::PRESS))
+            glfwSetWindowShouldClose(glfw_window, true);
         glfwPollEvents();
     }
 }
@@ -84,6 +94,7 @@ VkSurfaceKHR App::initSurface() {
 
     if (glfwCreateWindowSurface(vk_instance, glfw_window, nullptr, &sur))
          debug.ferr("GLFW::SURFACE", "Can't create surface!", "FERR::GLFW::SURFACE::INIT");
+    debug.info("GLFW::SURFACE", "Initialized!");
 
     return sur;
 }

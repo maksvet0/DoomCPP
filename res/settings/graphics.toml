@@ -1,0 +1,7 @@
+[window]
+width = 1280
+height = 720
+is_fullscreen = false
+
+[device]
+name = "AMD Radeon Graphics (RADV RENOIR)"

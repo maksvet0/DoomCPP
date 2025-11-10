@@ -7,34 +7,50 @@
 
 class Device {
 public:
-    explicit Device(VkInstance vk_instance, DGraphicsSettings settings);
-    ~Device();
-
-    VkDevice picked_device;
-    VkPhysicalDevice physical_device;
-    VkPhysicalDeviceProperties device_properties;
-
-private:
-    struct QueueFamilyIndices {
-        std::optional<uint32_t> graphicsFamily;
-
-        [[nodiscard]] inline bool is_completed() const {
-            return graphicsFamily.has_value();
-        }
+    struct DQueues {
+        /* Structure:
+         *     unsigned int : count,
+         *     VkQueue      : queue
+         */
+        std::vector<VkQueue> graphics;
+        std::vector<VkQueue> compute;
+        std::vector<VkQueue> transfer;
     };
 
-    static inline bool isDeviceSuitable(VkPhysicalDevice device) {
-        const QueueFamilyIndices indices = pickFamilyQueues(device);
+    explicit Device(VkInstance vk_instance, const DGraphicsSettings &settings);
+    ~Device();
 
-        return indices.is_completed();
-    }
+    VkDevice picked_device{};
+    VkPhysicalDevice physical_device;
+    VkPhysicalDeviceProperties device_properties{};
+    DQueues queues;
 
-    static QueueFamilyIndices pickFamilyQueues(VkPhysicalDevice physical_device);
+private:
+    struct DQueueFamilies {
+        /* Structure:
+         *     unsigned int:
+         *     id
+         *     count
+         *     all flags
+         */
+        std::vector<std::tuple<unsigned int, unsigned int, unsigned int>> graphics;
+        std::vector<std::tuple<unsigned int, unsigned int, unsigned int>> compute;
+        std::vector<std::tuple<unsigned int, unsigned int, unsigned int>> transfer;
 
+        bool compute_is_graphics = false;
+        bool transfer_is_compute = false;
+    };
+
+    VkInstance vk_instance;
     std::optional<uint32_t> graphicsFamily;
-    VkQueue graphicsQueue;
+    VkQueue graphicsQueue{};
 
-    std::vector<const char*> layers = SDebug::self->getValidationLayers();
+    [[nodiscard]] static inline bool isDeviceSuitable(VkPhysicalDevice device);
+    [[nodiscard]] static VkPhysicalDeviceProperties getPhysicalDeviceProperties(VkPhysicalDevice device);
+    [[nodiscard]] std::vector<VkPhysicalDevice> listPhysicalDevices() const;
+    [[nodiscard]] static std::vector<VkDeviceQueueCreateInfo> genQueueFamiliesCreateInfos(const DQueueFamilies &families, const float* queue_priorities);
+    [[nodiscard]] DQueues genQueues(const DQueueFamilies &families);
+    [[nodiscard]] DQueueFamilies listQueueFamilies() const;
 };
 
 
