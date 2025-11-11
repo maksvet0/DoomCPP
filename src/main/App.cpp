@@ -17,12 +17,21 @@ App::App(DAppManifest manifest, DSettings settings)
     });
     vk_instance = initVulkan();
     glfwShowWindow(glfw_window);
-    vk_surface = initSurface();
     vk_device = new Device(vk_instance, this->settings.graphics);
+    vk_surface = initSurface();
+    vk_swap_chain = new SwapChain(
+        vk_device,
+        vk_surface,
+        {
+            static_cast<unsigned int>(std::get<0>(this->settings.graphics.window_size)),
+            static_cast<unsigned int>(std::get<1>(this->settings.graphics.window_size))
+        }
+    );
 }
 
 App::~App() {
     delete input;
+    delete vk_swap_chain;
     vkDestroySurfaceKHR(vk_instance, vk_surface, nullptr);
     delete vk_device;
     vkDestroyInstance(vk_instance, nullptr);
@@ -92,7 +101,7 @@ VkInstance App::initVulkan() {
 VkSurfaceKHR App::initSurface() {
     VkSurfaceKHR sur;
 
-    if (glfwCreateWindowSurface(vk_instance, glfw_window, nullptr, &sur))
+    if (glfwCreateWindowSurface(vk_instance, glfw_window, nullptr, &sur) != VK_SUCCESS)
          debug.ferr("GLFW::SURFACE", "Can't create surface!", "FERR::GLFW::SURFACE::INIT");
     debug.info("GLFW::SURFACE", "Initialized!");
 

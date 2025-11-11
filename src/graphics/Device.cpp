@@ -36,6 +36,9 @@ Device::Device(VkInstance vk_instance, const DGraphicsSettings &settings) : vk_i
     auto queue_families = listQueueFamilies();
     auto queue_families_create_info = genQueueFamiliesCreateInfos(queue_families, QUEUE_PRIORITIES);
 
+    // Extensions
+    std::vector<const char*> device_extensions = {"VK_KHR_swapchain"};
+
     // This create_info needed for logical device
     // NOTE: Validation Layers in this create info are deprecated (read docs for more info)
     const VkDeviceCreateInfo create_device_info = {
@@ -43,7 +46,8 @@ Device::Device(VkInstance vk_instance, const DGraphicsSettings &settings) : vk_i
         .pNext = nullptr,
         .queueCreateInfoCount = static_cast<uint32_t>(queue_families_create_info.size()),
         .pQueueCreateInfos = queue_families_create_info.data(),
-        .enabledExtensionCount = 0,
+        .enabledExtensionCount = static_cast<uint32_t>(device_extensions.size()),
+        .ppEnabledExtensionNames = device_extensions.data(),
         .pEnabledFeatures = &features
     };
 

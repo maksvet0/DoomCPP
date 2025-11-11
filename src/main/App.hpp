@@ -5,6 +5,7 @@
 #include "Data.hpp"
 #include "SDebug.hpp"
 #include "graphics/Device.hpp"
+#include "graphics/SwapChain.hpp"
 #include "io/SInput.hpp"
 
 class App final {
@@ -23,6 +24,7 @@ private:
     VkSurfaceKHR vk_surface;
     VkInstance vk_instance;
     Device* vk_device;
+    SwapChain* vk_swap_chain;
     SDebug debug;
     SInput* input;
 

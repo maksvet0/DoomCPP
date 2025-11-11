@@ -28,7 +28,8 @@ add_executable(DoomCPP
     ${SRC}/main/SDebug.cpp
     ${SRC}/graphics/Device.cpp
     ${SRC}/io/SInput.hpp
-    ${SRC}/io/Files.hpp
+    ${SRC}/io/SFiles.hpp
+    ${SRC}/graphics/SwapChain.cpp
 )
 
 target_link_libraries(DoomCPP
