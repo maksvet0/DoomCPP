@@ -34,8 +34,64 @@ SwapChain::SwapChain(Device* device, VkSurfaceKHR surface, VkExtent2D surface_si
     if (vkCreateSwapchainKHR(this->device->picked_device, &create_info, nullptr, &self) != VK_SUCCESS)
         SDebug::self->ferr("VULKAN::SWAPCHAIN", "Can't init swapchain", "FERR::VULKAN::SWAPCHAIN::INIT");
     SDebug::self->info("VULKAN::SWAPCHAIN", "Initialized!");
+
+    // Creating image views
+    image_views = genImageViews();
 }
 
 SwapChain::~SwapChain() {
+    for (const auto& img : image_views) {
+        vkDestroyImageView(device->picked_device, img, nullptr);
+    }
     vkDestroySwapchainKHR(device->picked_device, self, nullptr);
+}
+
+std::vector<VkImageView> SwapChain::genImageViews() const {
+    // Get count of images
+    unsigned int count;
+    vkGetSwapchainImagesKHR(device->picked_device, self, &count, nullptr);
+
+    // Fill images array
+    std::vector<VkImage> images(count);
+    vkGetSwapchainImagesKHR(device->picked_device, self, &count, images.data());
+
+    // Create VkImageView for every image
+    std::vector<VkImageView> result(count);
+    for (const auto& img : images) {
+        VkImageView tmp;
+        VkImageViewCreateInfo create_info = {
+            .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+            .pNext = nullptr,
+            .image = img, // Current Image
+            .viewType = VK_IMAGE_VIEW_TYPE_2D, // 2D image
+            .format = VK_FORMAT_B8G8R8A8_SRGB, // Blue Green Red 8-bit colors with alpha
+            .components = { // No changes in channels of image
+                .r = VK_COMPONENT_SWIZZLE_R,
+                .g = VK_COMPONENT_SWIZZLE_G,
+                .b = VK_COMPONENT_SWIZZLE_B,
+                .a = VK_COMPONENT_SWIZZLE_A
+            },
+            .subresourceRange =  {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT, // Only for color
+                .baseMipLevel = 0, // This is not Mip-map texture
+                .levelCount = 1, // This is not Mip-map texture
+                .baseArrayLayer = 0, // Start with first level
+                .layerCount = 1 // Only one monitor
+            }
+        };
+
+        // Creating and checking
+        if (vkCreateImageView(device->picked_device, &create_info, nullptr, &tmp) != VK_SUCCESS)
+            SDebug::self->ferr(
+                "VULKAN::SWAPCHAIN::IMAGE_VIEWS",
+                "Can't create image views for images of swapchain!",
+                "VULKAN::SWAPCHAIN::IMAGE_VIEWS::INIT"
+            );
+        SDebug::self->info("VULKAN::SWAPCHAIN::IMAGE_VIEWS", "Created!");
+
+        // Add to main result
+        result.push_back(tmp);
+    }
+
+    return result;
 }

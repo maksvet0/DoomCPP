@@ -30,6 +30,9 @@ add_executable(DoomCPP
     ${SRC}/io/SInput.hpp
     ${SRC}/io/SFiles.hpp
     ${SRC}/graphics/SwapChain.cpp
+    ${SRC}/graphics/GraphicsPipeline.cpp
+    src/graphics/ShadersBox.cpp
+    src/graphics/ShadersBox.hpp
 )
 
 target_link_libraries(DoomCPP

@@ -9,7 +9,10 @@ public:
     ~SwapChain();
 
     VkSwapchainKHR self;
+    std::vector<VkImageView> image_views;
 
 private:
     Device* device;
+
+    [[nodiscard]] std::vector<VkImageView> genImageViews() const;
 };

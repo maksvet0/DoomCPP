@@ -37,19 +37,21 @@ SDebug::~SDebug() {
 }
 
 std::vector<const char*> SDebug::getValidationLayers() const {
-    uint32_t layerCount;
-    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+    uint32_t layer_count;
+    vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
 
-    std::vector<VkLayerProperties> availableLayers(layerCount);
-    vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+    std::vector<VkLayerProperties> availableLayers(layer_count);
+    vkEnumerateInstanceLayerProperties(&layer_count, availableLayers.data());
 
     return validationLayers;
 }
 
 void SDebug::print(const std::string &from, const std::string &message, const std::string &color, bool write) {
+    // Get current time
     const auto time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     const auto local_time = std::localtime(&time);
 
+    // Print to screen
     const std::string text = std::format(
         "[{}.{}.{}-{}:{}][{}] {}",
         local_time->tm_year + 1900, local_time->tm_mon + 1, local_time->tm_mday, local_time->tm_hour, local_time->tm_min,
@@ -57,8 +59,12 @@ void SDebug::print(const std::string &from, const std::string &message, const st
     );
     std::cout << std::format("{}{}{}", "\x1b[0m", color, text) << std::endl;
 
+    // Write to log
     if (write)
         latest_log << text << std::endl;
+
+    // Update log file
+    latest_log.flush();
 }
 
 void SDebug::info(const std::string &from, const std::string &message) {

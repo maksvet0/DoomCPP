@@ -5,6 +5,7 @@
 #include "Data.hpp"
 #include "SDebug.hpp"
 #include "graphics/Device.hpp"
+#include "graphics/ShadersBox.hpp"
 #include "graphics/SwapChain.hpp"
 #include "io/SInput.hpp"
 
@@ -25,6 +26,7 @@ private:
     VkInstance vk_instance;
     Device* vk_device;
     SwapChain* vk_swap_chain;
+    ShadersBox* vk_shaders;
     SDebug debug;
     SInput* input;
 

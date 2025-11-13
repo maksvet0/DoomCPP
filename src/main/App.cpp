@@ -27,10 +27,18 @@ App::App(DAppManifest manifest, DSettings settings)
             static_cast<unsigned int>(std::get<1>(this->settings.graphics.window_size))
         }
     );
+    vk_shaders = new ShadersBox(
+        vk_device,
+        {
+            .path_to_vertex = "res/shaders/compiled/VertexTriangle.spv",
+            .path_to_fragment = "res/shaders/compiled/FragmentTriangle.spv"
+        }
+    );
 }
 
 App::~App() {
     delete input;
+    delete vk_device;
     delete vk_swap_chain;
     vkDestroySurfaceKHR(vk_instance, vk_surface, nullptr);
     delete vk_device;
