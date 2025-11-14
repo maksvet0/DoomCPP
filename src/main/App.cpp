@@ -19,13 +19,14 @@ App::App(DAppManifest manifest, DSettings settings)
     glfwShowWindow(glfw_window);
     vk_device = new Device(vk_instance, this->settings.graphics);
     vk_surface = initSurface();
+    const auto extent = VkExtent2D {
+        static_cast<unsigned int>(std::get<0>(this->settings.graphics.window_size)),
+        static_cast<unsigned int>(std::get<1>(this->settings.graphics.window_size))
+    };
     vk_swap_chain = new SwapChain(
         vk_device,
         vk_surface,
-        {
-            static_cast<unsigned int>(std::get<0>(this->settings.graphics.window_size)),
-            static_cast<unsigned int>(std::get<1>(this->settings.graphics.window_size))
-        }
+        extent
     );
     vk_shaders = new ShadersBox(
         vk_device,
@@ -34,9 +35,22 @@ App::App(DAppManifest manifest, DSettings settings)
             .path_to_fragment = "res/shaders/compiled/FragmentTriangle.spv"
         }
     );
+    vk_render_pass = new RenderPass(vk_device);
+    vk_graphics_pipeline = new GraphicsPipeline(
+        vk_device,
+        GraphicsPipeline::DGraphicsPipelineSettings {
+            .view_size = extent,
+            .topology_mode = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+            .topology_fill_mode = VK_POLYGON_MODE_FILL,
+            .shaders = vk_shaders,
+            .render_pass = *vk_render_pass
+        }
+    );
 }
 
 App::~App() {
+    delete vk_graphics_pipeline;
+    delete vk_render_pass;
     delete input;
     delete vk_device;
     delete vk_swap_chain;
@@ -83,16 +97,11 @@ VkInstance App::initVulkan() {
     unsigned int extensions_count;
     const auto extensions = glfwGetRequiredInstanceExtensions(&extensions_count);
 
-    auto layers = debug.getValidationLayers();
-    debug.info("VULKAN::VALIDATION_LAYERS", "Got!");
-
     const VkInstanceCreateInfo create_info = {
         .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
         .pNext = nullptr,
         .flags = {},
         .pApplicationInfo = &app_info,
-        .enabledLayerCount = static_cast<uint32_t>(layers.size()),
-        .ppEnabledLayerNames = layers.data(),
         .enabledExtensionCount = extensions_count,
         .ppEnabledExtensionNames = extensions,
     };

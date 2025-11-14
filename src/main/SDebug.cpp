@@ -36,16 +36,6 @@ SDebug::~SDebug() {
     latest_log.close();
 }
 
-std::vector<const char*> SDebug::getValidationLayers() const {
-    uint32_t layer_count;
-    vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
-
-    std::vector<VkLayerProperties> availableLayers(layer_count);
-    vkEnumerateInstanceLayerProperties(&layer_count, availableLayers.data());
-
-    return validationLayers;
-}
-
 void SDebug::print(const std::string &from, const std::string &message, const std::string &color, bool write) {
     // Get current time
     const auto time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());

@@ -5,6 +5,7 @@ build
 # others
 .idea
 .vscode
+ignoreit
 
 # logs
 *.log

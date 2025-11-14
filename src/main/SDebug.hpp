@@ -21,7 +21,6 @@ public:
     char verbose_level;
     inline static SDebug* self;
 
-    std::vector<const char*> getValidationLayers() const;
     void print(const std::string& from, const std::string& message, const std::string& color, bool write);
     void info(const std::string& from, const std::string& message);
     void warn(const std::string& from, const std::string& message);

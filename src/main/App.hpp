@@ -5,6 +5,8 @@
 #include "Data.hpp"
 #include "SDebug.hpp"
 #include "graphics/Device.hpp"
+#include "graphics/GraphicsPipeline.hpp"
+#include "graphics/RenderPass.hpp"
 #include "graphics/ShadersBox.hpp"
 #include "graphics/SwapChain.hpp"
 #include "io/SInput.hpp"
@@ -27,6 +29,8 @@ private:
     Device* vk_device;
     SwapChain* vk_swap_chain;
     ShadersBox* vk_shaders;
+    RenderPass* vk_render_pass;
+    GraphicsPipeline* vk_graphics_pipeline;
     SDebug debug;
     SInput* input;
 

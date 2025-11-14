@@ -33,6 +33,8 @@ add_executable(DoomCPP
     ${SRC}/graphics/GraphicsPipeline.cpp
     src/graphics/ShadersBox.cpp
     src/graphics/ShadersBox.hpp
+    src/graphics/RenderPass.cpp
+    src/graphics/RenderPass.hpp
 )
 
 target_link_libraries(DoomCPP
