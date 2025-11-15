@@ -1,16 +1,16 @@
 #pragma once
 
+#define log TDebug::self->
 #include <fstream>
 #include <string>
-#include <vulkan/vulkan.h>
 #include <vector>
 
 #include "Data.hpp"
 
-class SDebug {
+class TDebug {
 public:
-    explicit SDebug(DDebugSettings settings);
-    ~SDebug();
+    explicit TDebug(DDebugSettings settings);
+    ~TDebug();
 
     /*
      * info = 0
@@ -19,7 +19,7 @@ public:
      * ferr = 3
      */
     char verbose_level;
-    inline static SDebug* self;
+    inline static TDebug* self;
 
     void print(const std::string& from, const std::string& message, const std::string& color, bool write);
     void info(const std::string& from, const std::string& message);

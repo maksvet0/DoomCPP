@@ -1,23 +1,22 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
-#include "Device.hpp"
-#include "io/SFiles.hpp"
+#include "io/TFiles.hpp"
 
 class ShadersBox {
 public:
-    struct DShaderBoxSettings {
+    struct DShaderBoxConfig {
         std::string path_to_vertex;
         std::string path_to_fragment;
     };
 
-    ShadersBox(Device* device, const DShaderBoxSettings &settings);
+    ShadersBox(VkDevice device, const DShaderBoxConfig &settings);
     ~ShadersBox();
 
     std::vector<VkPipelineShaderStageCreateInfo> stages;
 
 private:
-    Device* device;
+    VkDevice device;
     VkShaderModule vertex_module;
     VkShaderModule fragment_module;
 

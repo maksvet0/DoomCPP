@@ -1,15 +1,9 @@
 #pragma once
 
 #define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-#include "Data.hpp"
-#include "SDebug.hpp"
-#include "graphics/Device.hpp"
-#include "graphics/GraphicsPipeline.hpp"
-#include "graphics/RenderPass.hpp"
-#include "graphics/ShadersBox.hpp"
-#include "graphics/SwapChain.hpp"
-#include "io/SInput.hpp"
+#include "RenderManager.hpp"
+#include "../utils/Data.hpp"
+#include "io/TInput.hpp"
 
 class App final {
 public:
@@ -19,21 +13,8 @@ public:
     void run();
 
 private:
-    [[nodiscard]] GLFWwindow* initGLFW();
-    [[nodiscard]] VkInstance initVulkan();
-    [[nodiscard]] VkSurfaceKHR initSurface();
-
-    GLFWwindow* glfw_window;
-    VkSurfaceKHR vk_surface;
-    VkInstance vk_instance;
-    Device* vk_device;
-    SwapChain* vk_swap_chain;
-    ShadersBox* vk_shaders;
-    RenderPass* vk_render_pass;
-    GraphicsPipeline* vk_graphics_pipeline;
-    SDebug debug;
-    SInput* input;
-
+    TInput* inp;
+    std::unique_ptr<RenderManager> render;
     DSettings settings;
     const DAppManifest manifest;
 };

@@ -1,13 +1,14 @@
 #include "ShadersBox.hpp"
+#define log TDebug::self->
 
-ShadersBox::ShadersBox(Device* device, const DShaderBoxSettings &settings) : device(device) {
-    const auto vertex_src = SFiles::readFileBytes(settings.path_to_vertex);
-    const auto fragment_src = SFiles::readFileBytes(settings.path_to_fragment);
+ShadersBox::ShadersBox(VkDevice device, const DShaderBoxConfig &settings) : device(device) {
+    const auto vertex_src = TFiles::readFileBytes(settings.path_to_vertex);
+    const auto fragment_src = TFiles::readFileBytes(settings.path_to_fragment);
 
     vertex_module = createShaderModule(vertex_src);
-    SDebug::self->info("VULKAN::SHADERS", std::format("Created '{}'!", settings.path_to_vertex));
+    log info("VULKAN::SHADERS", std::format("Created '{}'!", settings.path_to_vertex));
     fragment_module = createShaderModule(fragment_src);
-    SDebug::self->info("VULKAN::SHADERS", std::format("Created '{}'!", settings.path_to_fragment));
+    log info("VULKAN::SHADERS", std::format("Created '{}'!", settings.path_to_fragment));
 
     stages = {
         buildStageCreateInfo(vertex_module, VK_SHADER_STAGE_VERTEX_BIT),
@@ -16,8 +17,8 @@ ShadersBox::ShadersBox(Device* device, const DShaderBoxSettings &settings) : dev
 }
 
 ShadersBox::~ShadersBox() {
-    vkDestroyShaderModule(device->picked_device, vertex_module, nullptr);
-    vkDestroyShaderModule(device->picked_device, fragment_module, nullptr);
+    vkDestroyShaderModule(device, vertex_module, nullptr);
+    vkDestroyShaderModule(device, fragment_module, nullptr);
 }
 
 VkShaderModule ShadersBox::createShaderModule(std::vector<char> code) const {
@@ -29,8 +30,8 @@ VkShaderModule ShadersBox::createShaderModule(std::vector<char> code) const {
         .pCode = reinterpret_cast<const uint32_t*>(code.data())
     };
 
-    if (vkCreateShaderModule(device->picked_device, &create_info, nullptr, &result) != VK_SUCCESS) {
-        SDebug::self->err("VULKAN::SHADERS", "Can't init shader!");
+    if (vkCreateShaderModule(device, &create_info, nullptr, &result) != VK_SUCCESS) {
+        log err("VULKAN::SHADERS", "Can't init shader!");
         return {};
     }
 

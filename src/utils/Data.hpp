@@ -3,6 +3,8 @@
 #include <vulkan/vulkan.h>
 #include <string>
 
+#define _new(type, ...) std::make_unique<type>(__VA_ARGS__)
+
 struct DVersion final {
     const unsigned int major;
     const unsigned int minor;
@@ -17,6 +19,7 @@ struct DManifest final {
     const std::string name;
     const DVersion version;
 };
+
 
 struct DAppManifest final {
     const DManifest engine;
@@ -36,8 +39,20 @@ struct DAppManifest final {
     }
 };
 
+struct DVector2u {
+    unsigned int x;
+    unsigned int y;
+
+    [[nodiscard]] inline constexpr VkExtent2D toVulkan() const {
+        return VkExtent2D {
+            .width = x,
+            .height = y
+        };
+    }
+};
+
 struct DGraphicsSettings final {
-    std::tuple<int, int> window_size;
+    DVector2u window_size;
     bool is_fullscreen;
     std::string device_name;
 };

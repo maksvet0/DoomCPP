@@ -2,17 +2,19 @@
 
 #include <vector>
 #include <vulkan/vulkan.h>
-#include "Device.hpp"
+#include "../base/Device.hpp"
 
 class RenderPass {
 public:
-    RenderPass(Device* device);
+    RenderPass(VkDevice device);
     ~RenderPass();
 
     VkRenderPass self;
 
+    void begin(VkFramebuffer framebuffer, VkExtent2D view_extent, VkCommandBuffer cmd_buffer);
+
 private:
-    Device* device;
+    VkDevice device;
 
     static constexpr VkAttachmentReference buildReference(unsigned int attachment);
     static constexpr VkSubpassDependency buildPhasesSyncSettings();

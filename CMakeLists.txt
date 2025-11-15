@@ -19,22 +19,22 @@ FetchContent_Declare(tomlplusplus
 FetchContent_MakeAvailable(glfw)
 FetchContent_MakeAvailable(tomlplusplus)
 
-
 find_package(Vulkan REQUIRED)
 
 add_executable(DoomCPP
     ${SRC}/Main.cpp
     ${SRC}/main/App.cpp
-    ${SRC}/main/SDebug.cpp
-    ${SRC}/graphics/Device.cpp
-    ${SRC}/io/SInput.hpp
-    ${SRC}/io/SFiles.hpp
-    ${SRC}/graphics/SwapChain.cpp
-    ${SRC}/graphics/GraphicsPipeline.cpp
-    src/graphics/ShadersBox.cpp
-    src/graphics/ShadersBox.hpp
-    src/graphics/RenderPass.cpp
-    src/graphics/RenderPass.hpp
+    ${SRC}/main/RenderManager.cpp
+    ${SRC}/utils/TDebug.cpp
+    ${SRC}/graphics/base/Device.cpp
+    ${SRC}/graphics/base/Window.cpp
+    ${SRC}/graphics/presentation/SwapChain.cpp
+    ${SRC}/graphics/presentation/ShadersBox.cpp
+    ${SRC}/graphics/render/GraphicsPipeline.cpp
+    ${SRC}/graphics/render/RenderPass.cpp
+    ${SRC}/graphics/render/CommandPool.cpp
+    ${SRC}/io/TInput.cpp
+    ${SRC}/io/TFiles.cpp
 )
 
 target_link_libraries(DoomCPP

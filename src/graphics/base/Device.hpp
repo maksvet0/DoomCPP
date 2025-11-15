@@ -2,16 +2,12 @@
 #define DOOMCPP_DEVICES_H
 
 #include <vulkan/vulkan.hpp>
-#include "../main/SDebug.hpp"
-#include "main/Data.hpp"
+#include "../../utils/TDebug.hpp"
+#include "../../utils/Data.hpp"
 
 class Device {
 public:
     struct DQueues {
-        /* Structure:
-         *     unsigned int : count,
-         *     VkQueue      : queue
-         */
         std::vector<VkQueue> graphics;
         std::vector<VkQueue> compute;
         std::vector<VkQueue> transfer;

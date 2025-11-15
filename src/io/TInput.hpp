@@ -1,24 +1,25 @@
 #pragma once
 
+#define inpt TInput::self->
 #include <functional>
 #include <map>
 #include <GLFW/glfw3.h>
 
 void glfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-class SInput final {
+class TInput final {
 public:
-    explicit SInput(GLFWwindow* window) :  window(window) {
+    explicit TInput(GLFWwindow* window) : window(window) {
         self = this;
         glfwSetKeyCallback(window, glfwKeyCallback);
     }
 
-    ~SInput() {
+    ~TInput() {
         self = nullptr;
         delete self;
     }
 
-    inline static SInput* self;
+    inline static TInput* self;
     std::map<std::tuple<int>, std::function<void()>> pressed_map;
 
     enum class EKey : int {
@@ -178,18 +179,14 @@ public:
         NUM_LOCK = 32
     };
 
-    [[nodiscard]] inline bool isKey(EKey key, EKeyAction action) const {
-        return glfwGetKey(window, static_cast<int>(key)) == static_cast<int>(action);
-    }
-    inline void setPressed(EKey key, const std::function<void()>& callback) {
-        pressed_map[static_cast<int>(key)] = callback;
-    }
+    [[nodiscard]] bool key(EKey key, EKeyAction action) const;
+    void onPressed(EKey key, const std::function<void()>& callback);
 
 private:
     GLFWwindow* window;
 };
 
 inline void glfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    if (action == static_cast<int>(SInput::EKeyAction::PRESS))
-        SInput::self->pressed_map[key]();
+    if (action == static_cast<int>(TInput::EKeyAction::PRESS))
+        inpt pressed_map[key]();
 }

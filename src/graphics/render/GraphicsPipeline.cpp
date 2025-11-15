@@ -1,10 +1,11 @@
 #include "GraphicsPipeline.hpp"
+#define log TDebug::self->
 
-GraphicsPipeline::GraphicsPipeline(Device* device, DGraphicsPipelineSettings settings) : device(device) {
+GraphicsPipeline::GraphicsPipeline(VkDevice device, const DGraphicsPipelineConfig& config) : device(device) {
     auto vertex = buildVertexBufferSettings();
-    auto topology = buildTopologySettings(settings.topology_mode);
-    auto viewport = buildViewportSettings(settings.view_size);
-    auto rasterization = buildRasterizationSettings(settings.topology_fill_mode);
+    auto topology = buildTopologySettings(config.topology_mode);
+    auto viewport = buildViewportSettings(config.view_size);
+    auto rasterization = buildRasterizationSettings(config.topology_fill_mode);
     auto anti_aliasing = buildAntiAliasingSettings();
     auto color_blend = buildColorBlendSettings();
     auto dynamic = buildDynamicSettings();
@@ -13,8 +14,8 @@ GraphicsPipeline::GraphicsPipeline(Device* device, DGraphicsPipelineSettings set
     VkGraphicsPipelineCreateInfo create_info = {
         .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
         .pNext = nullptr,
-        .stageCount = static_cast<unsigned int>(settings.shaders->stages.size()),
-        .pStages = settings.shaders->stages.data(),
+        .stageCount = static_cast<unsigned int>(config.shaders.size()),
+        .pStages = config.shaders.data(),
         .pVertexInputState = &vertex,
         .pInputAssemblyState = &topology,
         .pViewportState = &viewport,
@@ -23,7 +24,7 @@ GraphicsPipeline::GraphicsPipeline(Device* device, DGraphicsPipelineSettings set
         .pColorBlendState = &color_blend,
         .pDynamicState = &dynamic,
         .layout = layout,
-        .renderPass = settings.render_pass.self,
+        .renderPass = config.render_pass,
         .subpass = 0,
         // No another pipelines
         .basePipelineHandle = VK_NULL_HANDLE,
@@ -31,24 +32,24 @@ GraphicsPipeline::GraphicsPipeline(Device* device, DGraphicsPipelineSettings set
     };
 
     if (vkCreateGraphicsPipelines(
-        device->picked_device,
-        cache,
+        device,
+        nullptr,
         1,
         &create_info,
         nullptr,
         &self
     ) != VK_SUCCESS)
-        SDebug::self->ferr("VULKAN::PIPELINES::GRAPHICS", "Can't initialize!", "FERR::VULKAN::PIPELINES::GRAPHICS::INIT");
-    SDebug::self->info("VULKAN::PIPELINES::GRAPHICS", "Initialized!");
+        log ferr("VULKAN::PIPELINES::GRAPHICS", "Can't initialize!", "FERR::VULKAN::PIPELINES::GRAPHICS::INIT");
+    log info("VULKAN::PIPELINES::GRAPHICS", "Initialized!");
 }
 
 GraphicsPipeline::~GraphicsPipeline() {
-    vkDestroyPipeline(device->picked_device, self, nullptr);
+    vkDestroyPipeline(device, self, nullptr);
 }
 
-VkPipelineLayout GraphicsPipeline::createPipelineLayout() {
+constexpr VkPipelineLayout GraphicsPipeline::createPipelineLayout() const {
     // No uniforms => empty pipeline layout
-    VkPipelineLayoutCreateInfo create_info = {
+    constexpr VkPipelineLayoutCreateInfo create_info = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
         .pNext = nullptr,
         .setLayoutCount = 0,
@@ -58,9 +59,9 @@ VkPipelineLayout GraphicsPipeline::createPipelineLayout() {
     };
 
     VkPipelineLayout result;
-    if (vkCreatePipelineLayout(device->picked_device, &create_info, nullptr, &result) != VK_SUCCESS)
-        SDebug::self->ferr("VULKAN::PIPELINE::LAYOUT", "Can't create layout!", "FERR::VULKAN::PIPELINE::LAYOUT::INIT");
-    SDebug::self->info("VULKAN::PIPELINE::LAYOUT", "Created");
+    if (vkCreatePipelineLayout(device, &create_info, nullptr, &result) != VK_SUCCESS)
+        log ferr("VULKAN::PIPELINE::LAYOUT", "Can't create layout!", "FERR::VULKAN::PIPELINE::LAYOUT::INIT");
+    log info("VULKAN::PIPELINE::LAYOUT", "Created");
 
     return result;
 }

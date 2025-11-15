@@ -1,6 +1,6 @@
 #include "Device.hpp"
 
-#include "main/SDebug.hpp"
+#include "../../utils/TDebug.hpp"
 
 Device::Device(VkInstance vk_instance, const DGraphicsSettings &settings) : vk_instance(vk_instance) {
     const auto physical_devices = listPhysicalDevices();
@@ -16,7 +16,7 @@ Device::Device(VkInstance vk_instance, const DGraphicsSettings &settings) : vk_i
     // If user chosen some bullshit - choosing first device
     if (physical_device == VK_NULL_HANDLE) {
         physical_device = physical_devices[0];
-        SDebug::self->warn(
+        log warn(
         "VULKAN::DEVICE",
     std::format(""
                 "Unknown device in settings! Working device is {}",
@@ -53,7 +53,8 @@ Device::Device(VkInstance vk_instance, const DGraphicsSettings &settings) : vk_i
 
     // Creating device
     if (vkCreateDevice(physical_device, &create_device_info, nullptr, &picked_device) != VK_SUCCESS)
-        SDebug::self->ferr("VULKAN::LOGICAL_DEVICE", "Cannot create logical device!", "VULKAN::LOGICAL_DEVICE::INIT");
+        log ferr("VULKAN::LOGICAL_DEVICE", "Cannot create logical device!", "VULKAN::LOGICAL_DEVICE::INIT");
+    log info("VULKAN::LOGICAL_DEVICE", "Created!");
 
     // Creating queues
     queues = genQueues(queue_families);
@@ -95,11 +96,11 @@ std::vector<VkPhysicalDevice> Device::listPhysicalDevices() const {
         else
             msg += std::format("\t{}\n", getPhysicalDeviceProperties(*i).deviceName);
     }
-    SDebug::self->info("VULKAN::DEVICES", std::format("Suitable devices:\n{}", msg));
+    log info("VULKAN::DEVICES", std::format("Suitable devices:\n{}", msg));
 
     // Checking for no devices
     if (device_count == 0)
-        SDebug::self->ferr("VULKAN::DEVICE", "No suitable device!", "VULKAN::DEVICE::INIT");
+        log ferr("VULKAN::DEVICE", "No suitable device!", "VULKAN::DEVICE::INIT");
 
 
     return devices;
