@@ -1,6 +1,6 @@
 #pragma once
 
-#define log TDebug::self->
+#define tlog TDebug::self->
 #include <fstream>
 #include <string>
 #include <vector>

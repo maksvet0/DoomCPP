@@ -10,11 +10,11 @@ public:
     ~CommandPool();
 
     VkCommandPool self;
+    std::vector<VkCommandBuffer> buffers;
 
     void begin(unsigned int framebuffer_index);
 
 private:
-    std::vector<VkCommandBuffer> buffers;
     VkDevice device;
 
     [[nodiscard]] constexpr std::vector<VkCommandBuffer> createBuffers(unsigned int framebuffers_count);

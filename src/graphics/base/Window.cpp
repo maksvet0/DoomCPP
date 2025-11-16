@@ -40,16 +40,16 @@ VkInstance Window::initVulkan() const {
     // Creating Vulkan instance
     VkInstance instance;
     if (vkCreateInstance(&create_info, nullptr, &instance) != VK_SUCCESS)
-        log ferr("VULKAN::INIT", "Can't initialize!", "FERR::VULKAN::INIT");
-    log info("VULKAN", "Initialized!");
+        tlog ferr("VULKAN::INIT", "Can't initialize!", "FERR::VULKAN::INIT");
+    tlog info("VULKAN", "Initialized!");
 
     return instance;
 }
 
 GLFWwindow* Window::initGLFW() const {
     if (!glfwInit())
-        log ferr("GLFW", "Can't initialize!", "FERR::GLFW::INIT");
-    log info("GLFW", "Initialized!");
+        tlog ferr("GLFW", "Can't initialize!", "FERR::GLFW::INIT");
+    tlog info("GLFW", "Initialized!");
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);   // No OpenGL
     glfwWindowHint(GLFW_FOCUS_ON_SHOW, GLFW_TRUE);  // Focus to window then it shows
@@ -64,12 +64,12 @@ GLFWwindow* Window::initGLFW() const {
     );
 
     if (!result)
-        log ferr(
+        tlog ferr(
             "GLFW::WINDOW",
             "Can't open window!",
             "FERR::GLFW::WINDOW::INIT"
         );
-    log info("GLFW::WINDOW", "Opened!");
+    tlog info("GLFW::WINDOW", "Opened!");
 
     return result;
 }
@@ -78,8 +78,8 @@ VkSurfaceKHR Window::initSurface() const {
     VkSurfaceKHR result;
 
     if (glfwCreateWindowSurface(vulkan_instance, self, nullptr, &result) != VK_SUCCESS)
-        log ferr("GLFW::SURFACE", "Can't create surface!", "FERR::GLFW::SURFACE::INIT");
-    log info("GLFW::SURFACE", "Initialized!");
+        tlog ferr("GLFW::SURFACE", "Can't create surface!", "FERR::GLFW::SURFACE::INIT");
+    tlog info("GLFW::SURFACE", "Initialized!");
 
     return result;
 }

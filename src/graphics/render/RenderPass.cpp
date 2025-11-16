@@ -19,8 +19,8 @@ RenderPass::RenderPass(VkDevice device) : device(device) {
 
 
     if (vkCreateRenderPass(device, &create_info, nullptr, &self) != VK_SUCCESS)
-        log ferr("VULKAN::RENDER_PASS", "Can't initialize", "FERR::VULKAN::RENDER_PASS::INIT");
-    log info("VULKAN::RENDER_PASS", "Initialized");
+        tlog ferr("VULKAN::RENDER_PASS", "Can't initialize", "FERR::VULKAN::RENDER_PASS::INIT");
+    tlog info("VULKAN::RENDER_PASS", "Initialized");
 }
 
 RenderPass::~RenderPass() {

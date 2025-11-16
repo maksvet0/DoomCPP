@@ -39,7 +39,7 @@ struct DAppManifest final {
     }
 };
 
-struct DVector2u {
+struct DVector2u final {
     unsigned int x;
     unsigned int y;
 

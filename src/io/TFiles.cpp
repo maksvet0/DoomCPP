@@ -4,8 +4,9 @@ namespace TFiles {
     DGraphicsSettings loadGraphicsSettings(const std::string& path) {
         toml::table tbl = toml::parse_file(path);
 
-        const auto wnd = tbl["window"];
-        const auto dvc = tbl["device"];
+        auto wnd = tbl["window"];
+        auto dvc = tbl["device"];
+        auto dvc_name = dvc["name"].value<std::string>().value();
 
         return DGraphicsSettings {
             .window_size = {
@@ -13,7 +14,7 @@ namespace TFiles {
                 wnd["height"].value<unsigned int>().value_or(500)
             },
             .is_fullscreen = wnd["is_fullscreen"].value<bool>().value_or(false),
-            .device_name = dvc["name"].value<std::string>().value_or("")
+            .device_name = dvc_name
         };
     }
     std::vector<char> readFileBytes(const std::string& path) {
@@ -22,10 +23,10 @@ namespace TFiles {
 
         // Checking file
         if (!file.is_open()) {
-            log err("ENGINE::FILES", std::format("Can't load file '{}'", path));
+            tlog err("ENGINE::FILES", std::format("Can't load file '{}'", path));
             return {};
         }
-        log info("ENGINE::FILES", std::format("Loaded file '{}'", path));
+        tlog info("ENGINE::FILES", std::format("Loaded file '{}'", path));
 
         // Reading content
         std::vector<char> buffer((file.tellg()));

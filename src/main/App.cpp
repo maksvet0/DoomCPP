@@ -3,7 +3,8 @@
 #include <utility>
 
 App::App(DAppManifest manifest, DSettings settings)
-: settings(std::move(settings)), manifest(std::move(manifest)){
+: settings(settings), manifest(manifest){
+    dbg = _new(TDebug, this->settings.debug);
     render = _new(RenderManager,
         manifest,
         settings.graphics
@@ -20,6 +21,6 @@ void App::run() {
         if (inpt key(TInput::EKey::ESCAPE, TInput::EKeyAction::PRESS))
             render->window->end();
 
-        glfwPollEvents();
+        render->update();
     }
 }

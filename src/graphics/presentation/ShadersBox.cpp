@@ -1,14 +1,14 @@
 #include "ShadersBox.hpp"
-#define log TDebug::self->
+#define tlog TDebug::self->
 
 ShadersBox::ShadersBox(VkDevice device, const DShaderBoxConfig &settings) : device(device) {
     const auto vertex_src = TFiles::readFileBytes(settings.path_to_vertex);
     const auto fragment_src = TFiles::readFileBytes(settings.path_to_fragment);
 
     vertex_module = createShaderModule(vertex_src);
-    log info("VULKAN::SHADERS", std::format("Created '{}'!", settings.path_to_vertex));
+    tlog info("VULKAN::SHADERS", std::format("Created '{}'!", settings.path_to_vertex));
     fragment_module = createShaderModule(fragment_src);
-    log info("VULKAN::SHADERS", std::format("Created '{}'!", settings.path_to_fragment));
+    tlog info("VULKAN::SHADERS", std::format("Created '{}'!", settings.path_to_fragment));
 
     stages = {
         buildStageCreateInfo(vertex_module, VK_SHADER_STAGE_VERTEX_BIT),
@@ -31,7 +31,7 @@ VkShaderModule ShadersBox::createShaderModule(std::vector<char> code) const {
     };
 
     if (vkCreateShaderModule(device, &create_info, nullptr, &result) != VK_SUCCESS) {
-        log err("VULKAN::SHADERS", "Can't init shader!");
+        tlog err("VULKAN::SHADERS", "Can't init shader!");
         return {};
     }
 

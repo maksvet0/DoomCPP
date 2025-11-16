@@ -1,7 +1,8 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
-#include "../base/Device.hpp"
+#include <vector>
+#include "utils/TDebug.hpp"
 
 class SwapChain {
 public:

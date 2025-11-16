@@ -28,8 +28,8 @@ SwapChain::SwapChain(VkDevice device, DSwapchainConfig config) : device(device),
 
     // Creating swapchain
     if (vkCreateSwapchainKHR(device, &create_info, nullptr, &self) != VK_SUCCESS)
-        log ferr("VULKAN::SWAPCHAIN", "Can't init swapchain", "FERR::VULKAN::SWAPCHAIN::INIT");
-    log info("VULKAN::SWAPCHAIN", "Initialized!");
+        tlog ferr("VULKAN::SWAPCHAIN", "Can't init swapchain", "FERR::VULKAN::SWAPCHAIN::INIT");
+    tlog info("VULKAN::SWAPCHAIN", "Initialized!");
 
     // Creating image views
     image_views = genImageViews();
@@ -64,8 +64,8 @@ std::vector<VkFramebuffer> SwapChain::createFramebuffers(VkRenderPass render_pas
         // Creating framebuffer
         VkFramebuffer tmp;
         if (vkCreateFramebuffer(device, &create_info, nullptr, &tmp) != VK_SUCCESS)
-            log ferr("VULKAN::FRAMEBUFFER", "Can't create framebuffer!", "FERR::VULKAN::FRAMEBUFFER::INIT");
-        log info("VULKAN::FRAMEBUFFER", "Created!");
+            tlog ferr("VULKAN::FRAMEBUFFER", "Can't create framebuffer!", "FERR::VULKAN::FRAMEBUFFER::INIT");
+        tlog info("VULKAN::FRAMEBUFFER", "Created!");
 
         result.push_back(tmp);
     }
@@ -112,12 +112,12 @@ std::vector<VkImageView> SwapChain::genImageViews() const {
 
         // Creating and checking
         if (vkCreateImageView(device, &create_info, nullptr, &tmp) != VK_SUCCESS)
-            log ferr(
+            tlog ferr(
                 "VULKAN::SWAPCHAIN::IMAGE_VIEWS",
                 "Can't create image views for images of swapchain!",
                 "VULKAN::SWAPCHAIN::IMAGE_VIEWS::INIT"
             );
-        log info("VULKAN::SWAPCHAIN::IMAGE_VIEWS", "Created!");
+        tlog info("VULKAN::SWAPCHAIN::IMAGE_VIEWS", "Created!");
 
         // Add to main result
         result.push_back(tmp);

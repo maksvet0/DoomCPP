@@ -1,10 +1,10 @@
 #include "RenderManager.hpp"
 
 
-RenderManager::RenderManager(DAppManifest manifest, DGraphicsSettings settings) {
+RenderManager::RenderManager(DAppManifest manifest, DGraphicsSettings settings) : settings(settings) {
     // Base
     window = _new(Window, manifest, settings);
-    device = _new(Device, window->vulkan_instance, settings);
+    device = _new(Device, window->vulkan_instance, settings.device_name);
 
     // Presentation
     swapchain = _new(SwapChain,
@@ -36,4 +36,84 @@ RenderManager::RenderManager(DAppManifest manifest, DGraphicsSettings settings) 
         }
     );
     framebuffers = swapchain->createFramebuffers(render_pass->self);
+    command_pool = _new(CommandPool,
+        device->picked_device,
+        device->queue_families.graphics[0].id,
+        framebuffers.size()
+    );
+    sync = _new(Sync, device->picked_device);
+    glfwShowWindow(window->self);
+}
+
+void RenderManager::update() {
+    glfwPollEvents();
+    frame();
+}
+
+void RenderManager::frame() {
+    // Cpu-Gpu sync
+    sync->wait();
+    // Get current framebuffer
+    uint32_t framebuffer_index;
+    vkAcquireNextImageKHR(
+        device->picked_device,
+        swapchain->self,
+        UINT64_MAX,
+        sync->framebuffer_available,
+        VK_NULL_HANDLE,
+        &framebuffer_index
+    );
+
+    command_pool->begin(framebuffer_index);
+    render_pass->begin(
+        framebuffers[framebuffer_index],
+        settings.window_size.toVulkan(),
+        command_pool->buffers[framebuffer_index]
+    );
+    vkCmdBindPipeline(
+        command_pool->buffers[framebuffer_index],
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        graphics_pipeline->self
+    );
+    const VkViewport viewport = {
+        .x = 0,
+        .y = 0,
+        .width = static_cast<float>(settings.window_size.x),
+        .height = static_cast<float>(settings.window_size.y),
+        .minDepth = 0.0,
+        .maxDepth = 1.0
+    };
+    vkCmdSetViewport(command_pool->buffers[framebuffer_index], 0, 1, &viewport);
+
+    vkCmdDraw(command_pool->buffers[framebuffer_index], 3, 1, 0, 0);
+
+    vkCmdEndRenderPass(command_pool->buffers[framebuffer_index]);
+    vkEndCommandBuffer(command_pool->buffers[framebuffer_index]);
+
+    static VkPipelineStageFlags wait_stages[] = {
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+    };
+
+    VkSubmitInfo submit_info = {
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        .pNext = nullptr,
+        .waitSemaphoreCount = 1,
+        .pWaitSemaphores = &sync->framebuffer_available,
+        .commandBufferCount = 1,
+        .pCommandBuffers = &command_pool->buffers[framebuffer_index],
+        .signalSemaphoreCount = 1,
+        .pSignalSemaphores = &sync->render_finished,
+        .pWaitDstStageMask = wait_stages
+    };
+    vkQueueSubmit(device->queues.graphics[0], 1, &submit_info, sync->cpu_gpu_sync);
+    VkPresentInfoKHR presentInfo = {
+        .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+        .pNext = nullptr,
+        .waitSemaphoreCount = 1,
+        .pWaitSemaphores = &sync->render_finished,
+        .swapchainCount = 1,
+        .pSwapchains = &swapchain->self,
+        .pImageIndices = &framebuffer_index
+    };
+    vkQueuePresentKHR(device->queues.graphics[0], &presentInfo);
 }

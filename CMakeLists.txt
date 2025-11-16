@@ -35,6 +35,8 @@ add_executable(DoomCPP
     ${SRC}/graphics/render/CommandPool.cpp
     ${SRC}/io/TInput.cpp
     ${SRC}/io/TFiles.cpp
+    src/graphics/base/Sync.cpp
+    src/graphics/base/Sync.hpp
 )
 
 target_link_libraries(DoomCPP

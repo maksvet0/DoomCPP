@@ -1,13 +1,13 @@
 #include "Device.hpp"
 
-#include "../../utils/TDebug.hpp"
+#include "utils/TDebug.hpp"
 
-Device::Device(VkInstance vk_instance, const DGraphicsSettings &settings) : vk_instance(vk_instance) {
+Device::Device(VkInstance vk_instance, std::string device_name) : vk_instance(vk_instance) {
     const auto physical_devices = listPhysicalDevices();
 
     // Choosing physical device that user has chosen
-    for (const auto &device : physical_devices) {
-        if (getPhysicalDeviceProperties(device).deviceName == settings.device_name) {
+    for (auto device : physical_devices) {
+        if (getPhysicalDeviceProperties(device).deviceName == device_name) {
             physical_device = device;
             break;
         }
@@ -16,7 +16,7 @@ Device::Device(VkInstance vk_instance, const DGraphicsSettings &settings) : vk_i
     // If user chosen some bullshit - choosing first device
     if (physical_device == VK_NULL_HANDLE) {
         physical_device = physical_devices[0];
-        log warn(
+        tlog warn(
         "VULKAN::DEVICE",
     std::format(""
                 "Unknown device in settings! Working device is {}",
@@ -32,12 +32,15 @@ Device::Device(VkInstance vk_instance, const DGraphicsSettings &settings) : vk_i
     constexpr VkPhysicalDeviceFeatures features = {};
 
     // Add queues and families
-    const float* QUEUE_PRIORITIES = new float(1.f);
-    auto queue_families = listQueueFamilies();
-    auto queue_families_create_info = genQueueFamiliesCreateInfos(queue_families, QUEUE_PRIORITIES);
+    queue_families = listQueueFamilies();
+    std::vector QUEUE_PRIORITIES(
+        queue_families.transfer.back().id + 1, // Count of queue families is last queue index + 1
+        1.0f // All 1.0f
+    );
+    auto queue_families_create_info = genQueueFamiliesCreateInfos(queue_families, QUEUE_PRIORITIES.data());
 
     // Extensions
-    std::vector<const char*> device_extensions = {"VK_KHR_swapchain"};
+    std::vector device_extensions = {"VK_KHR_swapchain"};
 
     // This create_info needed for logical device
     // NOTE: Validation Layers in this create info are deprecated (read docs for more info)
@@ -53,14 +56,11 @@ Device::Device(VkInstance vk_instance, const DGraphicsSettings &settings) : vk_i
 
     // Creating device
     if (vkCreateDevice(physical_device, &create_device_info, nullptr, &picked_device) != VK_SUCCESS)
-        log ferr("VULKAN::LOGICAL_DEVICE", "Cannot create logical device!", "VULKAN::LOGICAL_DEVICE::INIT");
-    log info("VULKAN::LOGICAL_DEVICE", "Created!");
+        tlog ferr("VULKAN::LOGICAL_DEVICE", "Cannot create logical device!", "VULKAN::LOGICAL_DEVICE::INIT");
+    tlog info("VULKAN::LOGICAL_DEVICE", "Created!");
 
     // Creating queues
     queues = genQueues(queue_families);
-
-    // Delete temp shit
-    delete QUEUE_PRIORITIES;
 }
 
 Device::~Device() {
@@ -71,7 +71,7 @@ bool Device::isDeviceSuitable(VkPhysicalDevice device) {
     return getPhysicalDeviceProperties(device).limits.maxImageDimension2D >= 4096;
 }
 
-VkPhysicalDeviceProperties Device::getPhysicalDeviceProperties(const VkPhysicalDevice device) {
+VkPhysicalDeviceProperties Device::getPhysicalDeviceProperties(VkPhysicalDevice device) {
     VkPhysicalDeviceProperties tmp;
     vkGetPhysicalDeviceProperties(device, &tmp);
 
@@ -90,18 +90,17 @@ std::vector<VkPhysicalDevice> Device::listPhysicalDevices() const {
 
     // Checking for device compatibility
     std::string msg;
-    for (auto i = devices.begin(); i != devices.end(); ++i) {
-        if (!isDeviceSuitable(*i))
-            devices.erase(i);
-        else
-            msg += std::format("\t{}\n", getPhysicalDeviceProperties(*i).deviceName);
+    auto it = std::remove_if(devices.begin(), devices.end(),
+    [](VkPhysicalDevice device) { return !isDeviceSuitable(device); });
+    devices.erase(it, devices.end());
+        for (auto device : devices) {
+        msg += std::format("\t{}\n", getPhysicalDeviceProperties(device).deviceName);
     }
-    log info("VULKAN::DEVICES", std::format("Suitable devices:\n{}", msg));
+    tlog info("VULKAN::DEVICES", std::format("Suitable devices:\n{}", msg));
 
     // Checking for no devices
     if (device_count == 0)
-        log ferr("VULKAN::DEVICE", "No suitable device!", "VULKAN::DEVICE::INIT");
-
+        tlog ferr("VULKAN::DEVICE", "No suitable device!", "VULKAN::DEVICE::INIT");
 
     return devices;
 }
@@ -116,8 +115,8 @@ std::vector<VkDeviceQueueCreateInfo> Device::genQueueFamiliesCreateInfos(const D
                 .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
                 .pNext = nullptr,
                 .flags = {},
-                .queueFamilyIndex = std::get<0>(family),
-                .queueCount = std::get<1>(family),
+                .queueFamilyIndex = family.id,
+                .queueCount = family.count,
                 .pQueuePriorities = queue_priorities
             }
         );
@@ -130,8 +129,8 @@ std::vector<VkDeviceQueueCreateInfo> Device::genQueueFamiliesCreateInfos(const D
                     .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
                     .pNext = nullptr,
                     .flags = {},
-                    .queueFamilyIndex = std::get<0>(family),
-                    .queueCount = std::get<1>(family),
+                    .queueFamilyIndex = family.id,
+                    .queueCount = family.count,
                     .pQueuePriorities = queue_priorities
                 }
             );
@@ -145,8 +144,8 @@ std::vector<VkDeviceQueueCreateInfo> Device::genQueueFamiliesCreateInfos(const D
                     .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
                     .pNext = nullptr,
                     .flags = {},
-                    .queueFamilyIndex = std::get<0>(family),
-                    .queueCount = std::get<1>(family),
+                    .queueFamilyIndex = family.id,
+                    .queueCount = family.count,
                     .pQueuePriorities = queue_priorities
                 }
             );
@@ -160,12 +159,12 @@ Device::DQueues Device::genQueues(const DQueueFamilies &families) {
 
     // For graphics
     for (const auto& family : families.graphics) {
-        for (int i = 0; i != std::get<1>(family); i++) {
+        for (int i = 0; i != family.count; i++) {
             VkQueue tmp_queue;
 
             vkGetDeviceQueue (
                 picked_device,
-                std::get<0>(family),
+                family.id,
                 i,
                 &tmp_queue
             );
@@ -176,12 +175,12 @@ Device::DQueues Device::genQueues(const DQueueFamilies &families) {
 
     // For compute
     for (const auto& family : families.compute) {
-        for (int i = 0; i != std::get<1>(family); i++) {
+        for (int i = 0; i != family.count; i++) {
             VkQueue tmp_queue;
 
             vkGetDeviceQueue (
                 picked_device,
-                std::get<0>(family),
+                family.id,
                 i,
                 &tmp_queue
             );
@@ -192,12 +191,12 @@ Device::DQueues Device::genQueues(const DQueueFamilies &families) {
 
     // For graphics
     for (const auto& family : families.transfer) {
-        for (int i = 0; i != std::get<1>(family); i++) {
+        for (int i = 0; i != family.count; i++) {
             VkQueue tmp_queue;
 
             vkGetDeviceQueue (
                 picked_device,
-                std::get<0>(family),
+                family.id,
                 i,
                 &tmp_queue
             );
@@ -225,21 +224,39 @@ Device::DQueueFamilies Device::listQueueFamilies() const {
     // Checking by flags
     for (const auto& prop : props) {
         if ((prop.queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0)
-            result.graphics.push_back(std::make_tuple(index, prop.queueCount, prop.queueFlags));
+            result.graphics.push_back(
+                {
+                    index,
+                    prop.queueCount,
+                    prop.queueFlags
+                }
+            );
         else if ((prop.queueFlags & VK_QUEUE_COMPUTE_BIT) != 0)
-            result.compute.push_back(std::make_tuple(index, prop.queueCount, prop.queueFlags));
+            result.compute.push_back(
+                {
+                    index,
+                    prop.queueCount,
+                    prop.queueFlags
+                }
+            );
         else if ((prop.queueFlags & VK_QUEUE_TRANSFER_BIT) != 0)
-            result.compute.push_back(std::make_tuple(index, prop.queueCount, prop.queueFlags));
+            result.transfer.push_back(
+                {
+                    index,
+                    prop.queueCount,
+                    prop.queueFlags
+                }
+            );
 
         index++;
     }
 
     // If queues is less than needed
-    std::tuple<unsigned int, unsigned int, unsigned int> candidate = result.graphics[0];
+    DQueueFamily candidate = result.graphics[0];
     if (result.compute.empty()) {
         for (const auto prop : result.graphics) {
-            if ((std::get<2>(prop) & VK_QUEUE_COMPUTE_BIT) != 0
-                and std::get<1>(prop) > std::get<1>(candidate))
+            if ((prop.flags & VK_QUEUE_COMPUTE_BIT) != 0
+                and prop.count > candidate.count)
                 candidate = prop;
         }
         result.compute.push_back(candidate);
@@ -249,14 +266,13 @@ Device::DQueueFamilies Device::listQueueFamilies() const {
     candidate = result.compute[0];
     if (result.transfer.empty()) {
         for (const auto prop : result.compute) {
-            if ((std::get<2>(prop) & VK_QUEUE_TRANSFER_BIT) != 0
-                and std::get<1>(prop) > std::get<1>(candidate))
+            if ((prop.flags & VK_QUEUE_TRANSFER_BIT) != 0
+                and prop.count > candidate.count)
                 candidate = prop;
         }
         result.transfer.push_back(candidate);
         result.transfer_is_compute = true;
     }
-
 
     return result;
 }

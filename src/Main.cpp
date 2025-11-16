@@ -2,14 +2,14 @@
 #include "main/App.hpp"
 
 int main() {
-    App(
+    auto app = App(
         {
             .engine = {
-                .name = "SimpleEngine",
+                .name = "TenonEngine",
                 .version = {
                     .major = 0,
                     .minor = 0,
-                    .patch = 1
+                    .patch = 2
                 }
             },
             .app = {
@@ -23,13 +23,14 @@ int main() {
             .vulkan_api_version = VK_API_VERSION_1_4,
         },
         {
-            .graphics = SFiles::loadGraphicsSettings("res/settings/graphics.toml"),
+            .graphics = TFiles::loadGraphicsSettings("res/settings/graphics.toml"),
             .debug = {
                 .verbose_level = 1,
                 .is_save_previous_log = false
             }
         }
-    ).run();
+    );
+    app.run();
 
     return 0;
 }

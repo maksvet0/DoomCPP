@@ -1,5 +1,5 @@
 #include "GraphicsPipeline.hpp"
-#define log TDebug::self->
+#define tlog TDebug::self->
 
 GraphicsPipeline::GraphicsPipeline(VkDevice device, const DGraphicsPipelineConfig& config) : device(device) {
     auto vertex = buildVertexBufferSettings();
@@ -39,8 +39,8 @@ GraphicsPipeline::GraphicsPipeline(VkDevice device, const DGraphicsPipelineConfi
         nullptr,
         &self
     ) != VK_SUCCESS)
-        log ferr("VULKAN::PIPELINES::GRAPHICS", "Can't initialize!", "FERR::VULKAN::PIPELINES::GRAPHICS::INIT");
-    log info("VULKAN::PIPELINES::GRAPHICS", "Initialized!");
+        tlog ferr("VULKAN::PIPELINES::GRAPHICS", "Can't initialize!", "FERR::VULKAN::PIPELINES::GRAPHICS::INIT");
+    tlog info("VULKAN::PIPELINES::GRAPHICS", "Initialized!");
 }
 
 GraphicsPipeline::~GraphicsPipeline() {
@@ -60,8 +60,8 @@ constexpr VkPipelineLayout GraphicsPipeline::createPipelineLayout() const {
 
     VkPipelineLayout result;
     if (vkCreatePipelineLayout(device, &create_info, nullptr, &result) != VK_SUCCESS)
-        log ferr("VULKAN::PIPELINE::LAYOUT", "Can't create layout!", "FERR::VULKAN::PIPELINE::LAYOUT::INIT");
-    log info("VULKAN::PIPELINE::LAYOUT", "Created");
+        tlog ferr("VULKAN::PIPELINE::LAYOUT", "Can't create layout!", "FERR::VULKAN::PIPELINE::LAYOUT::INIT");
+    tlog info("VULKAN::PIPELINE::LAYOUT", "Created");
 
     return result;
 }

@@ -9,8 +9,10 @@ CommandPool::CommandPool(VkDevice device, unsigned int queue_family, unsigned in
     };
 
     if (vkCreateCommandPool(device, &create_info, nullptr, &self) != VK_SUCCESS)
-        log ferr("VULKAN::COMMAND_POOL", "Can't initialize!", "FERR::VULKAN::COMMAND_POOL::INIT");
-    log info("VULKAN::COMMAND_POOL", "Initialized!");
+        tlog ferr("VULKAN::COMMAND_POOL", "Can't initialize!", "FERR::VULKAN::COMMAND_POOL::INIT");
+    tlog info("VULKAN::COMMAND_POOL", "Initialized!");
+
+    buffers = createBuffers(framebuffers_count);
 }
 
 CommandPool::~CommandPool() {
@@ -26,11 +28,11 @@ void CommandPool::begin(unsigned int framebuffer_index) {
     };
 
     if (vkBeginCommandBuffer(buffers[framebuffer_index], &begin_info) != VK_SUCCESS)
-        log err("VULKAN::COMMAND_BUFFER", "Can't begin command buffer");
+        tlog err("VULKAN::COMMAND_BUFFER", "Can't begin command buffer");
 }
 
 constexpr std::vector<VkCommandBuffer> CommandPool::createBuffers(unsigned int framebuffers_count) {
-    std::vector<VkCommandBuffer> result;
+    std::vector<VkCommandBuffer> result(framebuffers_count);
 
     VkCommandBufferAllocateInfo allocate_info = {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
@@ -41,8 +43,8 @@ constexpr std::vector<VkCommandBuffer> CommandPool::createBuffers(unsigned int f
     };
 
     if (vkAllocateCommandBuffers(device, &allocate_info, result.data()) != VK_SUCCESS)
-        log ferr("VULKAN::COMMAND_BUFFERS", "Can't create", "FERR::VULKAN::COMMAND_BUFFERS::INIT");
-    log info("VULKAN::COMMAND_BUFFERS", "Created");
+        tlog ferr("VULKAN::COMMAND_BUFFERS", "Can't create", "FERR::VULKAN::COMMAND_BUFFERS::INIT");
+    tlog info("VULKAN::COMMAND_BUFFERS", "Created");
 
     return result;
 }
