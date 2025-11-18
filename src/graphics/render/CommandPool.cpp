@@ -20,6 +20,7 @@ CommandPool::~CommandPool() {
 }
 
 void CommandPool::begin(unsigned int framebuffer_index) {
+    vkResetCommandBuffer(buffers[framebuffer_index], 0);
     VkCommandBufferBeginInfo begin_info = {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
         .pNext = nullptr,

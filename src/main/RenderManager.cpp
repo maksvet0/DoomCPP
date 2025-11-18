@@ -50,19 +50,23 @@ void RenderManager::update() {
     frame();
 }
 
+void RenderManager::waitForEnd() {
+    vkDeviceWaitIdle(device->picked_device);
+}
+
 void RenderManager::frame() {
     // Cpu-Gpu sync
     sync->wait();
     // Get current framebuffer
     uint32_t framebuffer_index;
-    vkAcquireNextImageKHR(
+    if (vkAcquireNextImageKHR(
         device->picked_device,
         swapchain->self,
         UINT64_MAX,
         sync->framebuffer_available,
         VK_NULL_HANDLE,
         &framebuffer_index
-    );
+    ) != VK_SUCCESS) tlog info("!!", "!!");
 
     command_pool->begin(framebuffer_index);
     render_pass->begin(
@@ -85,6 +89,12 @@ void RenderManager::frame() {
     };
     vkCmdSetViewport(command_pool->buffers[framebuffer_index], 0, 1, &viewport);
 
+    const VkRect2D scissor = {
+        .offset = {0, 0},
+        .extent = settings.window_size.toVulkan()
+    };
+    vkCmdSetScissor(command_pool->buffers[framebuffer_index], 0, 1, &scissor);
+
     vkCmdDraw(command_pool->buffers[framebuffer_index], 3, 1, 0, 0);
 
     vkCmdEndRenderPass(command_pool->buffers[framebuffer_index]);
@@ -99,11 +109,11 @@ void RenderManager::frame() {
         .pNext = nullptr,
         .waitSemaphoreCount = 1,
         .pWaitSemaphores = &sync->framebuffer_available,
+        .pWaitDstStageMask = wait_stages,
         .commandBufferCount = 1,
         .pCommandBuffers = &command_pool->buffers[framebuffer_index],
         .signalSemaphoreCount = 1,
         .pSignalSemaphores = &sync->render_finished,
-        .pWaitDstStageMask = wait_stages
     };
     vkQueueSubmit(device->queues.graphics[0], 1, &submit_info, sync->cpu_gpu_sync);
     VkPresentInfoKHR presentInfo = {

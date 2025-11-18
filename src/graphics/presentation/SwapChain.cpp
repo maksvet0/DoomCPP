@@ -6,7 +6,7 @@ SwapChain::SwapChain(VkDevice device, DSwapchainConfig config) : device(device),
         .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
         .pNext = nullptr,
         .surface = config.surface,                                  // Surface what we paint
-        .minImageCount = 3,                                         // Minimal buffers count
+        .minImageCount = 4,                                         // Minimal buffers count
         .imageFormat = config.color_format,                         // Blue Green Red 8 bit format
         .imageColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR,        // Classical gamma correction
         .imageExtent = config.surface_size,                         // Width x Height of surface

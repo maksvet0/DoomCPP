@@ -28,11 +28,24 @@ VkInstance Window::initVulkan() const {
     unsigned int extensions_count;
     const auto extensions = glfwGetRequiredInstanceExtensions(&extensions_count);
 
+    unsigned int layer_count;
+    vkEnumerateInstanceLayerProperties(&layer_count, nullptr); // Get the number of available layers
+
+    std::vector<VkLayerProperties> available_layers(layer_count);
+    vkEnumerateInstanceLayerProperties(&layer_count, available_layers.data()); // Get the actual layer properties
+
+    std::vector<char*> layers;
+
+    for (auto lay : available_layers)
+        layers.push_back(lay.layerName); 
+    
     const VkInstanceCreateInfo create_info = {
         .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
         .pNext = nullptr,
         .flags = {},
         .pApplicationInfo = &app_info,
+        .enabledLayerCount = layer_count,
+        .ppEnabledLayerNames = layers.data(),
         .enabledExtensionCount = extensions_count,
         .ppEnabledExtensionNames = extensions,
     };

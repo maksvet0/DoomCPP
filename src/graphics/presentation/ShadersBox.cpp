@@ -2,8 +2,8 @@
 #define tlog TDebug::self->
 
 ShadersBox::ShadersBox(VkDevice device, const DShaderBoxConfig &settings) : device(device) {
-    const auto vertex_src = TFiles::readFileBytes(settings.path_to_vertex);
-    const auto fragment_src = TFiles::readFileBytes(settings.path_to_fragment);
+    static const auto vertex_src = TFiles::readFileBytes(settings.path_to_vertex);
+    static const auto fragment_src = TFiles::readFileBytes(settings.path_to_fragment);
 
     vertex_module = createShaderModule(vertex_src);
     tlog info("VULKAN::SHADERS", std::format("Created '{}'!", settings.path_to_vertex));

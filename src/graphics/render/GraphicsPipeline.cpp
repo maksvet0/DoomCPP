@@ -1,7 +1,12 @@
 #include "GraphicsPipeline.hpp"
+
+#include <format>
+#include <memory>
+
+#include "utils/TDebug.hpp"
 #define tlog TDebug::self->
 
-GraphicsPipeline::GraphicsPipeline(VkDevice device, const DGraphicsPipelineConfig& config) : device(device) {
+GraphicsPipeline::GraphicsPipeline(VkDevice device, DGraphicsPipelineConfig config) : device(device) {
     auto vertex = buildVertexBufferSettings();
     auto topology = buildTopologySettings(config.topology_mode);
     auto viewport = buildViewportSettings(config.view_size);
@@ -47,9 +52,9 @@ GraphicsPipeline::~GraphicsPipeline() {
     vkDestroyPipeline(device, self, nullptr);
 }
 
-constexpr VkPipelineLayout GraphicsPipeline::createPipelineLayout() const {
+VkPipelineLayout GraphicsPipeline::createPipelineLayout() const {
     // No uniforms => empty pipeline layout
-    constexpr VkPipelineLayoutCreateInfo create_info = {
+    VkPipelineLayoutCreateInfo create_info = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
         .pNext = nullptr,
         .setLayoutCount = 0,
@@ -66,11 +71,10 @@ constexpr VkPipelineLayout GraphicsPipeline::createPipelineLayout() const {
     return result;
 }
 
-
-constexpr VkPipelineColorBlendStateCreateInfo GraphicsPipeline::buildColorBlendSettings() {
-    const std::vector attachments = {
+VkPipelineColorBlendStateCreateInfo GraphicsPipeline::buildColorBlendSettings() {
+    static VkPipelineColorBlendAttachmentState attachments[] = {
         // Transparency enabling
-        VkPipelineColorBlendAttachmentState {
+        {
             .blendEnable = VK_TRUE, // Enabling blending
             .srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA, // Grab source alpha
             .dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA, // 1 - alpha is output color
@@ -86,12 +90,12 @@ constexpr VkPipelineColorBlendStateCreateInfo GraphicsPipeline::buildColorBlendS
         .sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
         .pNext = nullptr,
         .logicOpEnable = VK_FALSE, // No additional
-        .attachmentCount = static_cast<unsigned int>(attachments.size()),
-        .pAttachments = attachments.data()
+        .attachmentCount = 1,
+        .pAttachments = attachments
     };
 }
 
-constexpr VkPipelineMultisampleStateCreateInfo GraphicsPipeline::buildAntiAliasingSettings() {
+VkPipelineMultisampleStateCreateInfo GraphicsPipeline::buildAntiAliasingSettings() {
     return VkPipelineMultisampleStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
         .pNext = nullptr,
@@ -99,51 +103,38 @@ constexpr VkPipelineMultisampleStateCreateInfo GraphicsPipeline::buildAntiAliasi
     };
 }
 
-constexpr VkPipelineRasterizationStateCreateInfo GraphicsPipeline::buildRasterizationSettings(VkPolygonMode fill_mode) {
+VkPipelineRasterizationStateCreateInfo GraphicsPipeline::buildRasterizationSettings(VkPolygonMode fill_mode) {
     return VkPipelineRasterizationStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
         .pNext = nullptr,
         .polygonMode = fill_mode, // Type of fill
-        .cullMode = VK_CULL_MODE_BACK_BIT, // Cull only non-visible faces
+        .cullMode = VK_CULL_MODE_NONE, // Cull only non-visible faces
         .frontFace = VK_FRONT_FACE_CLOCKWISE, // Build topology by clockwise
         .lineWidth = 1.0f // Width of topology
     };
 }
 
-constexpr VkPipelineViewportStateCreateInfo GraphicsPipeline::buildViewportSettings(VkExtent2D viewport_size) {
-    const VkViewport viewport = {
-        .x = 0, // Offsets
-        .y = 0,
-        .width = static_cast<float>(viewport_size.width),
-        .height = static_cast<float>(viewport_size.height),
-        .minDepth = 0, // Default settings to depth
-        .maxDepth = 1
-    };
-    const VkRect2D scissor = {
-        .offset = {0, 0}, // Offset for scissor
-        .extent = viewport_size, // Scissor size
-    };
-
+VkPipelineViewportStateCreateInfo GraphicsPipeline::buildViewportSettings(VkExtent2D viewport_size) {
     return VkPipelineViewportStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
         .pNext = nullptr,
         .viewportCount = 1,
-        .pViewports = &viewport,
+        .pViewports = nullptr,
         .scissorCount = 1,
-        .pScissors = &scissor
+        .pScissors = nullptr
     };
 }
 
-constexpr VkPipelineInputAssemblyStateCreateInfo GraphicsPipeline::buildTopologySettings(VkPrimitiveTopology topology) {
+VkPipelineInputAssemblyStateCreateInfo GraphicsPipeline::buildTopologySettings(VkPrimitiveTopology topology) {
     return VkPipelineInputAssemblyStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
         .pNext = nullptr,
         .topology = topology, // Solid triangles
-        .primitiveRestartEnable = VK_TRUE // With indices topology aborts
+        .primitiveRestartEnable = VK_FALSE // Without indices topology aborts
     };
 }
 
-constexpr VkPipelineVertexInputStateCreateInfo GraphicsPipeline::buildVertexBufferSettings() {
+VkPipelineVertexInputStateCreateInfo GraphicsPipeline::buildVertexBufferSettings() {
     return VkPipelineVertexInputStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
         .pNext = nullptr,
@@ -154,15 +145,16 @@ constexpr VkPipelineVertexInputStateCreateInfo GraphicsPipeline::buildVertexBuff
     };
 }
 
-constexpr VkPipelineDynamicStateCreateInfo GraphicsPipeline::buildDynamicSettings() {
-    const std::vector states = {
-        VK_DYNAMIC_STATE_VIEWPORT, // To change viewport without recreating pipeline
-    };
+VkPipelineDynamicStateCreateInfo GraphicsPipeline::buildDynamicSettings() {
+    static const VkDynamicState states[] = {
+        VK_DYNAMIC_STATE_VIEWPORT,
+        VK_DYNAMIC_STATE_SCISSOR
+    }; // To change viewport without recreating pipeline
 
     return VkPipelineDynamicStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
         .pNext = nullptr,
-        .dynamicStateCount = static_cast<uint32_t>(states.size()),
-        .pDynamicStates = states.data()
+        .dynamicStateCount = 2,
+        .pDynamicStates = states
     };
 }

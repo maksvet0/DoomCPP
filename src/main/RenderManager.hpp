@@ -8,6 +8,7 @@
 #include "graphics/presentation/ShadersBox.hpp"
 #include "graphics/presentation/SwapChain.hpp"
 #include "graphics/render/CommandPool.hpp"
+#include "graphics/render/RenderPass.hpp"
 #include "graphics/render/GraphicsPipeline.hpp"
 
 class RenderManager {
@@ -17,6 +18,7 @@ public:
     std::unique_ptr<Window> window;
 
     void update();
+    void waitForEnd();
 
 private:
     DGraphicsSettings settings;

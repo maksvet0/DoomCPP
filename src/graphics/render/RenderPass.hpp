@@ -15,9 +15,4 @@ public:
 
 private:
     VkDevice device;
-
-    static constexpr VkAttachmentReference buildReference(unsigned int attachment);
-    static constexpr VkSubpassDependency buildPhasesSyncSettings();
-    static constexpr VkAttachmentDescription buildBufferSettings();
-    static constexpr VkSubpassDescription buildRenderPhasesSettings(VkAttachmentReference buffers_settings);
 };

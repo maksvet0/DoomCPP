@@ -2,7 +2,6 @@
 
 #include <vulkan/vulkan.h>
 #include <vector>
-#include "RenderPass.hpp"
 
 class GraphicsPipeline {
 public:
@@ -14,7 +13,7 @@ public:
         VkRenderPass render_pass;
     };
 
-    GraphicsPipeline(VkDevice device, const DGraphicsPipelineConfig& config);
+    GraphicsPipeline(VkDevice device, DGraphicsPipelineConfig config);
     ~GraphicsPipeline();
 
     VkPipeline self;
@@ -22,12 +21,12 @@ public:
 private:
     VkDevice device;
 
-    [[nodiscard]] constexpr VkPipelineLayout createPipelineLayout() const;
-    [[nodiscard]] static constexpr VkPipelineColorBlendStateCreateInfo buildColorBlendSettings();
-    [[nodiscard]] static constexpr VkPipelineMultisampleStateCreateInfo buildAntiAliasingSettings();
-    [[nodiscard]] static constexpr VkPipelineRasterizationStateCreateInfo buildRasterizationSettings(VkPolygonMode fill_mode);
-    [[nodiscard]] static constexpr VkPipelineViewportStateCreateInfo buildViewportSettings(VkExtent2D viewport_size);
-    [[nodiscard]] static constexpr VkPipelineInputAssemblyStateCreateInfo buildTopologySettings(VkPrimitiveTopology topology);
-    [[nodiscard]] static constexpr VkPipelineVertexInputStateCreateInfo buildVertexBufferSettings();
-    [[nodiscard]] static constexpr VkPipelineDynamicStateCreateInfo buildDynamicSettings();
+    [[nodiscard]] VkPipelineLayout createPipelineLayout() const;
+    [[nodiscard]] VkPipelineColorBlendStateCreateInfo buildColorBlendSettings();
+    [[nodiscard]] VkPipelineMultisampleStateCreateInfo buildAntiAliasingSettings();
+    [[nodiscard]] VkPipelineRasterizationStateCreateInfo buildRasterizationSettings(VkPolygonMode fill_mode);
+    [[nodiscard]] VkPipelineViewportStateCreateInfo buildViewportSettings(VkExtent2D viewport_size);
+    [[nodiscard]] VkPipelineInputAssemblyStateCreateInfo buildTopologySettings(VkPrimitiveTopology topology);
+    [[nodiscard]] VkPipelineVertexInputStateCreateInfo buildVertexBufferSettings();
+    [[nodiscard]] VkPipelineDynamicStateCreateInfo buildDynamicSettings();
 };

@@ -15,7 +15,7 @@ public:
 private:
     TInput* inp;
     std::unique_ptr<TDebug> dbg;
-    std::unique_ptr<RenderManager> render;
+    RenderManager* render;
     DSettings settings;
     const DAppManifest manifest;
 };

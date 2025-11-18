@@ -5,7 +5,7 @@
 App::App(DAppManifest manifest, DSettings settings)
 : settings(settings), manifest(manifest){
     dbg = _new(TDebug, this->settings.debug);
-    render = _new(RenderManager,
+    render = new RenderManager(
         manifest,
         settings.graphics
     );
@@ -14,6 +14,7 @@ App::App(DAppManifest manifest, DSettings settings)
 
 App::~App() {
     delete inp;
+    delete render;
 }
 
 void App::run() {
@@ -23,4 +24,5 @@ void App::run() {
 
         render->update();
     }
+    render->waitForEnd();
 }

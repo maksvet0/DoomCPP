@@ -187,6 +187,6 @@ private:
 };
 
 inline void glfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    if (action == static_cast<int>(TInput::EKeyAction::PRESS))
+    if (action == static_cast<int>(TInput::EKeyAction::PRESS) and inpt pressed_map[key])
         inpt pressed_map[key]();
 }
